@@ -190,12 +190,30 @@ class RSA: Crypto {
  ## Implementation of RSA.privateKey() and RSA.decrypt() */
     // The private key is used for decryption.
     func privateKey() -> PrivateKey {
-        return PrivateKey(decryptionExponent: 2, modulus: 3)
+        //var privateKey:PrivateKey
+        let encryptKey = self.publicKey().encryptionExponent
+        let mod = self.publicKey().modulus
+        let f_n = (p - 1) * (q - 1)
+        
+        var exponent = 1
+        
+        while true{
+            if ((exponent * encryptKey) % f_n == 1){
+                break
+            }
+            exponent = exponent + 1
+        }
+        return PrivateKey(decryptionExponent: exponent, modulus: mod)
     }
     
     // Decrypts cipherValue using the private key. Returns the plain value.
     func decrypt(cipherValue: Int) -> Int {
-        return 0
+        let _privateKey = privateKey()
+        let plainText = pow(Double(cipherValue), Double(_privateKey.decryptionExponent)) % Double(_privateKey.modulus)
+        
+        
+        
+        return Int(plainText)
     }
     
 }
@@ -262,6 +280,7 @@ class CryptoTestSuite: XCTestCase {
         let result = rsaExample.publicKey()
         let expectedEncryptionExponent = 7
         let expectedModulus = 55
+        //let test = result.encryptionExponent
         XCTAssertEqual(expectedEncryptionExponent, result.encryptionExponent, "Mismatch in public key encryption exponent.")
         XCTAssertEqual(expectedModulus, result.modulus, "Mismatch in public key modulus.")
     }
@@ -272,6 +291,7 @@ class CryptoTestSuite: XCTestCase {
         let result = rsaExample.privateKey()
         let expectedDecryptionExponent = 23
         let expectedModulus = 55
+        //let test = result.decryptionExponent
         XCTAssertEqual(expectedDecryptionExponent, result.decryptionExponent, "Mismatch in private key decryption exponent.")
         XCTAssertEqual(expectedModulus, result.modulus, "Mismatch in private key modulus.")
     }
@@ -282,6 +302,7 @@ class CryptoTestSuite: XCTestCase {
         let result = rsaExample.privateKey()
         let expectedDecryptionExponent = 7
         let expectedModulus = 65
+        //let test = result.decryptionExponent
         XCTAssertEqual(expectedDecryptionExponent, result.decryptionExponent, "Mismatch in private key decryption exponent.")
         XCTAssertEqual(expectedModulus, result.modulus, "Mismatch in private key modulus.")
     }
@@ -291,6 +312,7 @@ class CryptoTestSuite: XCTestCase {
         let rsaExample = RSA(p: 5, q: 11)
         let encryptedValue = rsaExample.encrypt(2)
         let expectedValue = 18
+        
         XCTAssertEqual(expectedValue, encryptedValue, "Mismatch in encrypted value.")
     }
     
